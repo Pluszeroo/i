@@ -21,6 +21,8 @@ public class Movement : MonoBehaviour
     private Vector2 knockTarget;
     private bool knocking = false;
 
+    public bool clampToScreen = true;
+    public float screenMargin = 0.3f;
     private void Awake() => rb = GetComponent<Rigidbody2D>();
 
     private void FixedUpdate()
@@ -29,8 +31,11 @@ public class Movement : MonoBehaviour
 
         if (knocking)
         {
-            rb.MovePosition(Vector2.MoveTowards(rb.position, knockTarget, knockbackSpeed * Time.deltaTime));
-            if (Vector2.Distance(rb.position, knockTarget) < 0.05f)
+            Vector2 kpos = ClampToView(Vector2.MoveTowards(rb.position, knockTarget, knockbackSpeed * Time.deltaTime));
+            rb.MovePosition(kpos);
+
+            if (Vector2.Distance(rb.position, knockTarget) < 0.05f ||
+                Vector2.Distance(rb.position, kpos) < 0.001f)
             {
                 knocking = false;
                 if (snake != null) snake.ResetPathAfterKnockback();
@@ -48,7 +53,20 @@ public class Movement : MonoBehaviour
         }
         if (snake != null) snake.SetReverseMessage(false);
 
-        rb.MovePosition(rb.position + dir * moveSpeed * Time.deltaTime);
+        rb.MovePosition(ClampToView(rb.position + dir * moveSpeed * Time.deltaTime));
+    }
+
+    Vector2 ClampToView(Vector2 pos)
+    {
+        if (!clampToScreen || Camera.main == null) return pos;
+
+        Camera cam = Camera.main;
+        Vector3 min = cam.ViewportToWorldPoint(new Vector3(0f, 0f, 0f));
+        Vector3 max = cam.ViewportToWorldPoint(new Vector3(1f, 1f, 0f));
+
+        pos.x = Mathf.Clamp(pos.x, min.x + screenMargin, max.x - screenMargin);
+        pos.y = Mathf.Clamp(pos.y, min.y + screenMargin, max.y - screenMargin);
+        return pos;
     }
 
     private void OnEnable()

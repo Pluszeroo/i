@@ -40,6 +40,10 @@ public class FollowTail : MonoBehaviour
     private bool canMerge, merged, reverseShown, revealed;
     private float stillTimer = 0f;
 
+    public float messageFadeCharDuration = 0.05f;
+    private TMPro.TMP_Text reverseTmp;
+    private Coroutine fadeRoutine;
+
     public Vector3 messageOffset = new Vector3(0.6f, 0.8f, 0f);
 
     public float hitDistance = 0.6f;
@@ -62,6 +66,7 @@ public class FollowTail : MonoBehaviour
             path.Add(leader.position);
         }
         if (reverseMessage != null) reverseMessage.SetActive(false);
+        if (reverseMessage != null) reverseTmp = reverseMessage.GetComponent<TMPro.TMP_Text>();
     }
 
     void Update()
@@ -192,7 +197,35 @@ public class FollowTail : MonoBehaviour
     {
         if (show == reverseShown) return;
         reverseShown = show;
-        if (reverseMessage != null) reverseMessage.SetActive(show);
+        if (reverseMessage == null) return;
+
+        if (fadeRoutine != null) { StopCoroutine(fadeRoutine); fadeRoutine = null; }
+
+        if (show)
+        {
+            reverseMessage.SetActive(true);
+            if (reverseTmp != null) reverseTmp.maxVisibleCharacters = 9999;
+        }
+        else
+        {
+            fadeRoutine = StartCoroutine(FadeReverseMessage());
+        }
+    }
+
+    System.Collections.IEnumerator FadeReverseMessage()
+    {
+        if (reverseTmp == null) { reverseMessage.SetActive(false); yield break; }
+
+        reverseTmp.ForceMeshUpdate();
+        int total = reverseTmp.textInfo.characterCount;
+
+        for (int i = total; i >= 0; i--)
+        {
+            reverseTmp.maxVisibleCharacters = i;
+            yield return new WaitForSeconds(messageFadeCharDuration);
+        }
+        reverseMessage.SetActive(false);
+        fadeRoutine = null;
     }
 
     void DoMerge()
