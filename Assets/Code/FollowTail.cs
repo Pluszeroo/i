@@ -44,6 +44,9 @@ public class FollowTail : MonoBehaviour
     private TMPro.TMP_Text reverseTmp;
     private Coroutine fadeRoutine;
 
+    public ChapterTitles chapters;
+    public float chapter2Distance = 60f;
+
     public Vector3 messageOffset = new Vector3(0.6f, 0.8f, 0f);
 
     public float hitDistance = 0.6f;
@@ -77,6 +80,9 @@ public class FollowTail : MonoBehaviour
         lastLeaderPos = leader.position;
         if (!canMerge && totalDistance >= unlockDistance) canMerge = true;
 
+        if (revealed && chapters != null && totalDistance >= chapter2Distance)
+            chapters.ShowChapter(2);
+
         if (movement == null || !movement.IsKnocking) RecordHead();
         UpdateLength();
 
@@ -84,8 +90,9 @@ public class FollowTail : MonoBehaviour
         if (stopped) stillTimer += Time.deltaTime;
         else stillTimer = 0f;
 
-        if (canMerge && stopped && revealed)
+        if (canMerge && revealed && stillTimer >= stillTimeToMerge)
         {
+            if (chapters != null) chapters.ShowChapter(3);
             transform.position = Vector3.MoveTowards(
                 transform.position, leader.position, mergeApproachSpeed * Time.deltaTime);
             if (Vector3.Distance(transform.position, leader.position) <= mergeThreshold)

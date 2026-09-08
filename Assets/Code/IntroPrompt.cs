@@ -19,6 +19,8 @@ public class IntroPrompt : MonoBehaviour
 
     private bool fading = false;
 
+    public ChapterTitles chapters;
+
     void Start()
     {
         if (movement != null) movement.frozen = true; 
@@ -64,6 +66,7 @@ public class IntroPrompt : MonoBehaviour
         {
             started = true;
             if (movement != null) movement.frozen = false;
+            if (chapters != null) chapters.ShowChapter(1);
         }
     }
 
