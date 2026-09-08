@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using Unity.Cinemachine;
 
 [RequireComponent(typeof(LineRenderer))]
 [RequireComponent(typeof(SpriteRenderer))]
@@ -54,6 +53,9 @@ public class FollowTail : MonoBehaviour
     [Range(0f, 1f)] public float mergeViewportX = 0.5f;
     [Range(0f, 1f)] public float mergeViewportY = 0.6f;
     public float cameraMoveDuration = 1.5f;
+
+    public float messageMinDisplayTime = 1.5f;
+    private float messageShownAt = -999f;
 
     void Start()
     {
@@ -118,6 +120,7 @@ public class FollowTail : MonoBehaviour
         path.Add(leader.position);
         currentLength = restLength;
         transform.position = leader.position;
+        stillTimer = 0f;
         revealed = false;
         sr.enabled = false;
     }
@@ -184,16 +187,17 @@ public class FollowTail : MonoBehaviour
 
     public bool IsBacktracking(Vector2 pos, Vector2 dir)
     {
-        if (merged || path.Count < 3) return false;
+        if (merged || path.Count < 5) return false;
 
         int nearest = -1; float best = float.MaxValue;
-        for (int i = 0; i < path.Count; i++)
+
+        int searchEnd = path.Count - 4;
+        for (int i = 0; i < searchEnd; i++)
         {
             float d = Vector2.Distance(pos, path[i]);
             if (d < best) { best = d; nearest = i; }
         }
-        if (best > onPathTolerance) return false;
-        if (nearest >= path.Count - 2) return false;
+        if (nearest < 0 || best > onPathTolerance) return false;
 
         Vector2 forward = (Vector2)(path[nearest + 1] - path[nearest]);
         if (forward.sqrMagnitude < 0.0001f) return false;
@@ -203,6 +207,9 @@ public class FollowTail : MonoBehaviour
     public void SetReverseMessage(bool show)
     {
         if (show == reverseShown) return;
+
+        if (!show && Time.time - messageShownAt < messageMinDisplayTime) return;
+
         reverseShown = show;
         if (reverseMessage == null) return;
 
@@ -210,6 +217,7 @@ public class FollowTail : MonoBehaviour
 
         if (show)
         {
+            messageShownAt = Time.time; 
             reverseMessage.SetActive(true);
             if (reverseTmp != null) reverseTmp.maxVisibleCharacters = 9999;
         }

@@ -23,6 +23,9 @@ public class Movement : MonoBehaviour
 
     public bool clampToScreen = true;
     public float screenMargin = 0.3f;
+
+    private float knockStartTime;
+
     private void Awake() => rb = GetComponent<Rigidbody2D>();
 
     private void FixedUpdate()
@@ -30,7 +33,6 @@ public class Movement : MonoBehaviour
         if (frozen)
         {
             rb.linearVelocity = Vector2.zero;
-            Debug.Log("frozen, pops = " + rb.position);
             return;
         }
 
@@ -40,7 +42,7 @@ public class Movement : MonoBehaviour
             rb.MovePosition(kpos);
 
             if (Vector2.Distance(rb.position, knockTarget) < 0.05f ||
-                Vector2.Distance(rb.position, kpos) < 0.001f)
+                Time.time - knockStartTime > 1.5f)
             {
                 knocking = false;
                 if (snake != null) snake.ResetPathAfterKnockback();
@@ -92,6 +94,7 @@ public class Movement : MonoBehaviour
     {
         Vector2 away = ((Vector2)rb.position - fromPos).normalized;
         if (away.sqrMagnitude < 0.01f) away = Vector2.right;
+        knockStartTime = Time.time;
         knockTarget = rb.position + away * knockbackDistance;
         knocking = true;
     }

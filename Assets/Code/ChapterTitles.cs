@@ -19,12 +19,20 @@ public class ChapterTitles : MonoBehaviour
 
     public float chapter1Delay = 2f;
 
+    public CanvasGroup subtitleLine2;
+    public float subtitle2Delay = 3f;
+
+    public CanvasGroup subtitleLine3;
+    public float subtitle3Delay = 0.5f;
+
     void Start()
     {
         if (chapter1 != null) chapter1.alpha = 0f;
         if (chapter2 != null) chapter2.alpha = 0f;
         if (chapter3 != null) chapter3.alpha = 0f;
         if (subtitleLine != null) subtitleLine.alpha = 0f;
+        if (subtitleLine2 != null) subtitleLine2.alpha = 0f;
+        if (subtitleLine3 != null) subtitleLine3.alpha = 0f;
     }
 
     public void ShowChapter(int index)   // 1, 2, 3
@@ -46,6 +54,12 @@ public class ChapterTitles : MonoBehaviour
 
         if (index == 1 && subtitleLine != null)
             StartCoroutine(ShowSubtitle());
+
+        if (index == 2 && subtitleLine2 != null)
+            StartCoroutine(ShowSubtitle2());
+
+        if (index == 3 && subtitleLine3 != null)
+            StartCoroutine(ShowSubtitle3());
     }
 
     IEnumerator DelayedFade(CanvasGroup cg, float delay)
@@ -58,6 +72,18 @@ public class ChapterTitles : MonoBehaviour
     {
         yield return new WaitForSeconds(subtitleDelay);
         yield return FadeInOut(subtitleLine);
+    }
+
+    IEnumerator ShowSubtitle2()
+    {
+        yield return new WaitForSeconds(subtitle2Delay);
+        yield return FadeInOut(subtitleLine2);
+    }
+
+    IEnumerator ShowSubtitle3()
+    {
+        yield return new WaitForSeconds(subtitle3Delay);
+        yield return FadeInOut(subtitleLine3);
     }
 
     IEnumerator FadeInOut(CanvasGroup cg)

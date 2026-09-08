@@ -15,6 +15,10 @@ public class EndingSequence : MonoBehaviour
     public float pauseBeforeTitle = 1f; 
     public float titleFadeInDuration = 2f;
 
+    public CanvasGroup credits;
+    public float creditsDelay = 2f;
+    public float creditsFadeInDuration = 2f;
+
     public void PlayEnding()
     {
         StartCoroutine(EndingRoutine());
@@ -22,6 +26,8 @@ public class EndingSequence : MonoBehaviour
 
     IEnumerator EndingRoutine()
     {
+        if (credits != null) credits.alpha = 0f;
+
         float t = 0f;
         Color[] startColors = new Color[fadeOutSprites.Length];
         for (int i = 0; i < fadeOutSprites.Length; i++)
@@ -59,8 +65,21 @@ public class EndingSequence : MonoBehaviour
                 titleImage.color = tc;
                 yield return null;
             }
-        }
 
-        Debug.Log("Ending complete");
+            if (credits != null)
+            {
+                yield return new WaitForSeconds(creditsDelay);
+
+                float t3 = 0f;
+                while (t3 < 1f)
+                {
+                    t3 += Time.deltaTime / creditsFadeInDuration;
+                    credits.alpha = Mathf.Lerp(0f, 1f, t3);
+                    yield return null;
+                }
+            }
+
+            Debug.Log("Ending complete");
+        }
     }
 }
