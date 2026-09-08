@@ -17,6 +17,8 @@ public class ChapterTitles : MonoBehaviour
 
     private bool[] played = new bool[3];
 
+    public float chapter1Delay = 2f;
+
     void Start()
     {
         if (chapter1 != null) chapter1.alpha = 0f;
@@ -32,10 +34,24 @@ public class ChapterTitles : MonoBehaviour
         played[index - 1] = true;
 
         CanvasGroup cg = index == 1 ? chapter1 : (index == 2 ? chapter2 : chapter3);
-        if (cg != null) StartCoroutine(FadeInOut(cg));
+
+        if (index == 1)
+        {
+            if (cg != null) StartCoroutine(DelayedFade(cg, chapter1Delay));
+        }
+        else
+        {
+            if (cg != null) StartCoroutine(FadeInOut(cg));
+        }
 
         if (index == 1 && subtitleLine != null)
             StartCoroutine(ShowSubtitle());
+    }
+
+    IEnumerator DelayedFade(CanvasGroup cg, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        yield return FadeInOut(cg);
     }
 
     IEnumerator ShowSubtitle()

@@ -27,7 +27,12 @@ public class Movement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (frozen) return;
+        if (frozen)
+        {
+            rb.linearVelocity = Vector2.zero;
+            Debug.Log("frozen, pops = " + rb.position);
+            return;
+        }
 
         if (knocking)
         {
